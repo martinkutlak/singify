@@ -32,25 +32,13 @@
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        .song-title {
+        a.song-link {
             font-weight: bold;
             font-size: 18px;
-            margin-bottom: 5px;
-        }
-        iframe {
-            width: 100%;
-            height: 400px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        a.download {
-            display: inline-block;
-            margin-top: 8px;
-            text-decoration: none;
             color: #0066cc;
-            font-size: 14px;
+            text-decoration: none;
         }
-        a.download:hover {
+        a.song-link:hover {
             text-decoration: underline;
         }
     </style>
@@ -88,23 +76,12 @@
                 songList.innerHTML = '';
                 filteredSongs.forEach(song => {
                     const li = document.createElement('li');
-
-                    const titleDiv = document.createElement('div');
-                    titleDiv.className = 'song-title';
-                    titleDiv.textContent = `${song.id} - ${song.title} - ${song.artist}`;
-                    li.appendChild(titleDiv);
-
-                    const iframe = document.createElement('iframe');
-                    iframe.src = song.url;
-                    li.appendChild(iframe);
-
-                    const downloadLink = document.createElement('a');
-                    downloadLink.href = song.url;
-                    downloadLink.className = 'download';
-                    downloadLink.textContent = 'Stáhnout PDF';
-                    downloadLink.target = '_blank';
-                    li.appendChild(downloadLink);
-
+                    const link = document.createElement('a');
+                    link.className = 'song-link';
+                    link.textContent = `${song.id} - ${song.title} - ${song.artist}`;
+                    link.href = song.url;
+                    link.target = '_blank';  // otevře PDF v nové záložce
+                    li.appendChild(link);
                     songList.appendChild(li);
                 });
             }
