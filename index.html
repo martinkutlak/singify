@@ -5,171 +5,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SINGIFY</title>
     <style>
-        :root {
-            --primary: #2c3e50;
-            --accent: #e67e22;
-            --bg: #f8f9fa;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--bg);
-            margin: 0;
-            padding: 10px;
-            color: var(--primary);
-        }
-        header {
-            text-align: center;
-            padding: 20px 0;
-        }
-        h1 { margin: 0; letter-spacing: 2px; }
-        
-        #search {
-            display: block;
-            margin: 10px auto 20px;
-            width: 90%;
-            max-width: 500px;
-            padding: 12px;
-            font-size: 16px;
-            border: 2px solid #ddd;
-            border-radius: 25px;
-            outline: none;
-            transition: border-color 0.3s;
-        }
+        :root { --primary: #2c3e50; --accent: #e67e22; --bg: #f8f9fa; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 10px; color: var(--primary); }
+        header { text-align: center; padding: 20px 0; }
+        #search { display: block; margin: 10px auto 20px; width: 90%; max-width: 500px; padding: 12px; font-size: 16px; border: 2px solid #ddd; border-radius: 25px; outline: none; }
         #search:focus { border-color: var(--accent); }
-
-        ul {
-            list-style: none;
-            padding: 0;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        li {
-            background: #fff;
-            margin-bottom: 10px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
-        }
-        li:active { transform: scale(0.98); }
-
-        .song-link {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            text-decoration: none;
-            color: inherit;
-        }
-        .song-id {
-            background: var(--accent);
-            color: white;
-            min-width: 35px;
-            height: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            font-weight: bold;
-            font-size: 14px;
-            margin-right: 15px;
-        }
+        ul { list-style: none; padding: 0; max-width: 600px; margin: 0 auto; }
+        li { background: #fff; margin-bottom: 10px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .song-link { display: flex; align-items: center; padding: 15px; text-decoration: none; color: inherit; }
+        .song-id { background: var(--accent); color: white; min-width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold; margin-right: 15px; }
         .song-info { display: flex; flex-direction: column; }
         .song-title { font-weight: bold; font-size: 18px; }
         .song-artist { font-size: 14px; color: #7f8c8d; }
     </style>
 </head>
 <body>
-
-    <header>
-        <h1>SINGIFY</h1>
-    </header>
-
-    <input type="text" id="search" placeholder="Hledat píseň nebo interpreta...">
-    <ul id="songList">
-        <li style="text-align:center; padding: 20px;">Načítám písničky...</li>
-    </ul>
+    <header><h1>SINGIFY</h1></header>
+    <input type="text" id="search" placeholder="Hledat píseň, interpreta nebo číslo...">
+    <ul id="songList"><li style="text-align:center; padding: 20px;">Načítám zpěvník...</li></ul>
 
     <script>
-        // NASTAVENÍ: Změňte na své uživatelské jméno a název repozitáře
-        const USER = 'martinkutlak';
-        const REPO = 'singify';
-
         async function loadSongs() {
             try {
-                const response = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/pdf`);
-                const data = await response.json();
+                const response = await fetch('songs.json');
+                const songs = await response.json();
                 const songList = document.getElementById('songList');
 
-                const songs = data
-                    .filter(file => file.name.endsWith('.pdf'))
-                    .map(file => {
-                        // Logika parsování: 001_nazev_pisne__interpret.pdf
-                        // 1. Odstraníme .pdf
-                        const cleanName = file.name.replace('.pdf', '');
-                        // 2. Rozdělíme na část před a za '__'
-                        const mainParts = cleanName.split('__');
-                        const leftPart = mainParts[0]; // např. "001_nazev_pisne"
-                        const artistPart = mainParts[1] || 'Neznámý interpret';
-
-                        // 3. Z levé části získáme ID (vše před prvním podtržítkem)
-                        const firstUnderscoreIndex = leftPart.indexOf('_');
-                        const id = leftPart.substring(0, firstUnderscoreIndex);
-                        const titlePart = leftPart.substring(firstUnderscoreIndex + 1);
-
-                        function formatText(str) {
-                            return str.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                        }
-
-                        // Vytvoříme přímou URL, která se v prohlížeči otevře, nikoliv stáhne
-                        const viewUrl = `https://${USER}.github.io/${REPO}/pdf/${encodeURIComponent(file.name)}`;
-
-                        return {
-                            id: id,
-                            title: formatText(titlePart),
-                            artist: formatText(artistPart),
-                            url: viewUrl
-                        };
-                    });
-
-                function displaySongs(filteredSongs) {
-                    songList.innerHTML = '';
-                    if (filteredSongs.length === 0) {
-                        songList.innerHTML = '<li style="padding:20px; text-align:center;">Nic jsme nenašli :(</li>';
-                        return;
-                    }
-                    
-                    filteredSongs.forEach(song => {
-                        const li = document.createElement('li');
-                        li.innerHTML = `
-                            <a href="${song.url}" class="song-link" target="_blank">
-                                <div class="song-id">${song.id}</div>
+                function displaySongs(filtered) {
+                    songList.innerHTML = filtered.map(s => `
+                        <li>
+                            <a href="${s.url}" class="song-link" target="_blank">
+                                <div class="song-id">${s.id}</div>
                                 <div class="song-info">
-                                    <span class="song-title">${song.title}</span>
-                                    <span class="song-artist">${song.artist}</span>
+                                    <span class="song-title">${s.title}</span>
+                                    <span class="song-artist">${s.artist}</span>
                                 </div>
                             </a>
-                        `;
-                        songList.appendChild(li);
-                    });
+                        </li>
+                    `).join('') || '<li style="padding:20px; text-align:center;">Nic nenalezeno</li>';
                 }
 
                 displaySongs(songs);
-
                 document.getElementById('search').addEventListener('input', e => {
                     const term = e.target.value.toLowerCase();
-                    const filtered = songs.filter(s => 
+                    displaySongs(songs.filter(s => 
                         s.title.toLowerCase().includes(term) || 
-                        s.artist.toLowerCase().includes(term) ||
+                        s.artist.toLowerCase().includes(term) || 
                         s.id.includes(term)
-                    );
-                    displaySongs(filtered);
+                    ));
                 });
-
-            } catch (error) {
-                document.getElementById('songList').innerHTML = '<li>Chyba při načítání dat.</li>';
-                console.error(error);
+            } catch (e) {
+                document.getElementById('songList').innerHTML = '<li>Zatím žádné písničky. Nahrajte PDF a počkejte minutu.</li>';
             }
         }
-
         loadSongs();
     </script>
 </body>
