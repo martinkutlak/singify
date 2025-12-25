@@ -4,60 +4,193 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SINGIFY</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #2c3e50; --accent: #e67e22; --bg: #f8f9fa; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 10px; color: var(--primary); }
-        header { text-align: center; padding: 20px 0; }
-        #search { display: block; margin: 10px auto 20px; width: 90%; max-width: 500px; padding: 12px; font-size: 16px; border: 2px solid #ddd; border-radius: 25px; outline: none; }
-        #search:focus { border-color: var(--accent); }
-        ul { list-style: none; padding: 0; max-width: 600px; margin: 0 auto; }
-        li { background: #fff; margin-bottom: 10px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .song-link { display: flex; align-items: center; padding: 15px; text-decoration: none; color: inherit; }
-        .song-id { background: var(--accent); color: white; min-width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold; margin-right: 15px; }
-        .song-info { display: flex; flex-direction: column; }
-        .song-title { font-weight: bold; font-size: 18px; }
-        .song-artist { font-size: 14px; color: #7f8c8d; }
+        :root {
+            --primary: #2c3e50;
+            --accent: #e67e22;
+            --bg: #f8f9fa;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            margin: 0;
+            padding: 10px;
+            color: var(--primary);
+        }
+        header {
+            text-align: center;
+            padding: 25px 0 15px;
+        }
+        h1 { 
+            margin: 0; 
+            letter-spacing: 3px; 
+            font-size: 2.5rem;
+            color: var(--primary);
+        }
+        .signature {
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.4rem;
+            color: var(--accent);
+            display: block;
+            margin-top: -8px; /* Přitáhne podpis k názvu */
+        }
+        
+        #search {
+            display: block;
+            margin: 10px auto 25px;
+            width: 90%;
+            max-width: 500px;
+            padding: 14px 20px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 30px;
+            outline: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        #search:focus {
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px rgba(230, 126, 34, 0.2);
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        li {
+            background: #fff;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        li:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        li:active {
+            transform: scale(0.98);
+        }
+
+        .song-link {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            text-decoration: none;
+            color: inherit;
+        }
+        .song-id {
+            background: var(--accent);
+            color: white;
+            min-width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 14px;
+            margin-right: 18px;
+            flex-shrink: 0;
+        }
+        .song-info {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .song-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .song-artist {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-top: 2px;
+        }
+
+        /* Styl pro načítací text a chyby */
+        .status-msg {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
-    <header><h1>SINGIFY</h1></header>
+
+    <header>
+        <h1>SINGIFY</h1>
+        <span class="signature">by Martin Kutlak</span>
+    </header>
+
     <input type="text" id="search" placeholder="Hledat píseň, interpreta nebo číslo...">
-    <ul id="songList"><li style="text-align:center; padding: 20px;">Načítám zpěvník...</li></ul>
+    
+    <ul id="songList">
+        <li class="status-msg">Načítám tvůj zpěvník...</li>
+    </ul>
 
     <script>
         async function loadSongs() {
+            const songList = document.getElementById('songList');
             try {
+                // Načítáme automaticky generovaný soubor
                 const response = await fetch('songs.json');
+                if (!response.ok) throw new Error('Soubor songs.json nenalezen');
+                
                 const songs = await response.json();
-                const songList = document.getElementById('songList');
 
-                function displaySongs(filtered) {
-                    songList.innerHTML = filtered.map(s => `
+                function displaySongs(filteredSongs) {
+                    if (filteredSongs.length === 0) {
+                        songList.innerHTML = '<li class="status-msg">Žádná píseň neodpovídá hledání.</li>';
+                        return;
+                    }
+
+                    songList.innerHTML = filteredSongs.map(song => `
                         <li>
-                            <a href="${s.url}" class="song-link" target="_blank">
-                                <div class="song-id">${s.id}</div>
+                            <a href="${song.url}" class="song-link" target="_blank">
+                                <div class="song-id">${song.id}</div>
                                 <div class="song-info">
-                                    <span class="song-title">${s.title}</span>
-                                    <span class="song-artist">${s.artist}</span>
+                                    <span class="song-title">${song.title}</span>
+                                    <span class="song-artist">${song.artist}</span>
                                 </div>
                             </a>
                         </li>
-                    `).join('') || '<li style="padding:20px; text-align:center;">Nic nenalezeno</li>';
+                    `).join('');
                 }
 
+                // Prvotní zobrazení
                 displaySongs(songs);
+
+                // Filtrace při psaní
                 document.getElementById('search').addEventListener('input', e => {
                     const term = e.target.value.toLowerCase();
-                    displaySongs(songs.filter(s => 
+                    const filtered = songs.filter(s => 
                         s.title.toLowerCase().includes(term) || 
-                        s.artist.toLowerCase().includes(term) || 
-                        s.id.includes(term)
-                    ));
+                        s.artist.toLowerCase().includes(term) ||
+                        s.id.toString().includes(term)
+                    );
+                    displaySongs(filtered);
                 });
-            } catch (e) {
-                document.getElementById('songList').innerHTML = '<li>Zatím žádné písničky. Nahrajte PDF a počkejte minutu.</li>';
+
+            } catch (error) {
+                songList.innerHTML = `
+                    <li class="status-msg">
+                        <p>Zatím tu nic není.</p>
+                        <small style="display:block; margin-top:10px;">
+                            Ujistěte se, že jste nahráli PDF a robot dokončil aktualizaci (trvá to cca 1 minutu).
+                        </small>
+                    </li>`;
+                console.error('Chyba při načítání:', error);
             }
         }
+
         loadSongs();
     </script>
 </body>
