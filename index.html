@@ -6,121 +6,30 @@
     <title>SINGIFY</title>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #2c3e50;
-            --accent: #e67e22;
-            --bg: #f8f9fa;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--bg);
-            margin: 0;
-            padding: 10px;
-            color: var(--primary);
-        }
-        header {
-            text-align: center;
-            padding: 25px 0 15px;
-        }
-        h1 { 
-            margin: 0; 
-            letter-spacing: 3px; 
-            font-size: 2.5rem;
-            color: var(--primary);
-        }
-        .signature {
-            font-family: 'Dancing Script', cursive;
-            font-size: 1.4rem;
-            color: var(--accent);
-            display: block;
-            margin-top: -8px; /* Přitáhne podpis k názvu */
-        }
+        :root { --primary: #2c3e50; --accent: #e67e22; --bg: #f8f9fa; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 10px; color: var(--primary); }
+        header { text-align: center; padding: 25px 0 15px; }
+        h1 { margin: 0; letter-spacing: 3px; font-size: 2.5rem; }
+        .signature { font-family: 'Dancing Script', cursive; font-size: 1.4rem; color: var(--accent); display: block; margin-top: -8px; }
         
-        #search {
-            display: block;
-            margin: 10px auto 25px;
-            width: 90%;
-            max-width: 500px;
-            padding: 14px 20px;
-            font-size: 16px;
-            border: 2px solid #ddd;
-            border-radius: 30px;
-            outline: none;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
-        }
-        #search:focus {
-            border-color: var(--accent);
-            box-shadow: 0 4px 12px rgba(230, 126, 34, 0.2);
-        }
+        #search { display: block; margin: 10px auto 25px; width: 90%; max-width: 500px; padding: 14px 20px; font-size: 16px; border: 2px solid #ddd; border-radius: 30px; outline: none; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        #search:focus { border-color: var(--accent); }
 
-        ul {
-            list-style: none;
-            padding: 0;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        li {
-            background: #fff;
-            margin-bottom: 12px;
-            border-radius: 12px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        li:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        li:active {
-            transform: scale(0.98);
-        }
+        ul { list-style: none; padding: 0; max-width: 600px; margin: 0 auto; }
+        li { background: #fff; margin-bottom: 12px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: transform 0.2s; }
+        li:active { transform: scale(0.98); }
 
-        .song-link {
-            display: flex;
-            align-items: center;
-            padding: 16px;
-            text-decoration: none;
-            color: inherit;
-        }
-        .song-id {
-            background: var(--accent);
-            color: white;
-            min-width: 38px;
-            height: 38px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            font-weight: bold;
-            font-size: 14px;
-            margin-right: 18px;
-            flex-shrink: 0;
-        }
-        .song-info {
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        .song-title {
-            font-weight: 700;
-            font-size: 1.1rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .song-artist {
-            font-size: 0.9rem;
-            color: #7f8c8d;
-            margin-top: 2px;
-        }
+        .song-link { display: flex; align-items: center; padding: 16px; text-decoration: none; color: inherit; }
+        .song-id { background: var(--accent); color: white; min-width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold; margin-right: 18px; flex-shrink: 0; }
+        
+        .song-info { display: flex; flex-direction: column; }
+        .song-title { font-weight: 700; font-size: 1.1rem; }
+        
+        /* Styl pro interpreta a capo */
+        .song-meta { font-size: 0.9rem; color: #7f8c8d; margin-top: 2px; }
+        .capo-info { font-size: 0.85rem; color: #95a5a6; font-style: italic; margin-left: 5px; }
 
-        /* Styl pro načítací text a chyby */
-        .status-msg {
-            text-align: center;
-            padding: 40px;
-            color: #7f8c8d;
-            font-style: italic;
-        }
+        .status-msg { text-align: center; padding: 40px; color: #7f8c8d; font-style: italic; }
     </style>
 </head>
 <body>
@@ -130,7 +39,7 @@
         <span class="signature">by Martin Kutlak</span>
     </header>
 
-    <input type="text" id="search" placeholder="Hledat píseň, interpreta nebo číslo...">
+    <input type="text" id="search" placeholder="Hledat píseň, interpreta, capo nebo číslo...">
     
     <ul id="songList">
         <li class="status-msg">Načítám tvůj zpěvník...</li>
@@ -140,10 +49,7 @@
         async function loadSongs() {
             const songList = document.getElementById('songList');
             try {
-                // Načítáme automaticky generovaný soubor
                 const response = await fetch('songs.json');
-                if (!response.ok) throw new Error('Soubor songs.json nenalezen');
-                
                 const songs = await response.json();
 
                 function displaySongs(filteredSongs) {
@@ -158,39 +64,32 @@
                                 <div class="song-id">${song.id}</div>
                                 <div class="song-info">
                                     <span class="song-title">${song.title}</span>
-                                    <span class="song-artist">${song.artist}</span>
+                                    <div class="song-meta">
+                                        <span>${song.artist}</span>
+                                        ${song.capo ? `<span class="capo-info">(${song.capo})</span>` : ''}
+                                    </div>
                                 </div>
                             </a>
                         </li>
                     `).join('');
                 }
 
-                // Prvotní zobrazení
                 displaySongs(songs);
 
-                // Filtrace při psaní
                 document.getElementById('search').addEventListener('input', e => {
                     const term = e.target.value.toLowerCase();
-                    const filtered = songs.filter(s => 
+                    displaySongs(songs.filter(s => 
                         s.title.toLowerCase().includes(term) || 
                         s.artist.toLowerCase().includes(term) ||
-                        s.id.toString().includes(term)
-                    );
-                    displaySongs(filtered);
+                        s.id.toString().includes(term) ||
+                        (s.capo && s.capo.toLowerCase().includes(term))
+                    ));
                 });
 
             } catch (error) {
-                songList.innerHTML = `
-                    <li class="status-msg">
-                        <p>Zatím tu nic není.</p>
-                        <small style="display:block; margin-top:10px;">
-                            Ujistěte se, že jste nahráli PDF a robot dokončil aktualizaci (trvá to cca 1 minutu).
-                        </small>
-                    </li>`;
-                console.error('Chyba při načítání:', error);
+                songList.innerHTML = '<li class="status-msg">Chyba při načítání songs.json.</li>';
             }
         }
-
         loadSongs();
     </script>
 </body>
