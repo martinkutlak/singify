@@ -1,0 +1,20 @@
+name: Aktualizace Zpevniku
+on:
+  push:
+    paths:
+      - 'pdf/**'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: Spustit vypocet seznamu
+        run: python generate_list.py
+      - name: Ulozit zmeny
+        run: |
+          git config --global user.name 'Zpevnik Robot'
+          git config --global user.email 'robot@github.com'
+          git add songs.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Automaticka aktualizace" && git push)
