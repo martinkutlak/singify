@@ -1,0 +1,20 @@
+[
+    {
+        "id": "001",
+        "title": "Zombie",
+        "artist": "Yungblud",
+        "url": "pdf/001_zombie__yungblud.pdf"
+    },
+    {
+        "id": "002",
+        "title": "This Is The Life",
+        "artist": "Amy Macdonald",
+        "url": "pdf/002_this_is_the_life__amy_macdonald.pdf"
+    },
+    {
+        "id": "003",
+        "title": "Walk",
+        "artist": "Foo Fighters",
+        "url": "pdf/003_walk__foo_fighters.pdf"
+    }
+]
